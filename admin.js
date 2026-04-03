@@ -10,6 +10,7 @@ let isLoggedIn = false;
 let products = [];
 let orders = [];
 let db;
+let app;
 
 const defaultProducts = [];
 
@@ -50,6 +51,7 @@ function initFirebase() {
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
+    app = firebase.app();
     db = firebase.firestore();
     
     if (db) {
@@ -96,38 +98,7 @@ function initFirebase() {
         });
     }
     
-    if (firebase.messaging && firebase.messaging.isSupported()) {
-        navigator.serviceWorker.register('https://stickzonetn.github.io/StickZone.tn/firebase-messaging-sw.js')
-            .then(function(registration) {
-                var messaging = firebase.messaging();
-                
-                messaging.onMessage(function(payload) {
-                    console.log('Message received in admin:', payload);
-                    if (payload.notification) {
-                        new Notification(payload.notification.title, {
-                            body: payload.notification.body,
-                            icon: 'logo.png'
-                        });
-                    }
-                });
-                
-                messaging.getToken({
-                    vapidKey: "BIJImK19REAXSKC7s8hOGIzQ904lIOmOTdXUOeUkxcCJF2T2AlFsvGkLhTsRFJXuQfekIWs32vLuPXj0XMIpGCY",
-                    serviceWorkerRegistration: registration
-                })
-                    .then(function(currentToken) {
-                    if (currentToken) {
-                        console.log('Admin FCM Token:', currentToken);
-                        localStorage.setItem('admin_fcm_token', currentToken);
-                    }
-                }).catch(function(err) {
-                    console.log('Error getting admin FCM token:', err);
-                });
-            })
-            .catch(function(err) {
-                console.log('Service worker registration failed:', err);
-            });
-    }
+    // Messaging is handled in getFCMToken to avoid caching issues
 }
 
 function showNewOrderNotification(order) {
@@ -1144,7 +1115,7 @@ function getFCMToken() {
     
     navigator.serviceWorker.register('https://stickzonetn.github.io/StickZone.tn/firebase-messaging-sw.js')
         .then(function(registration) {
-            var messaging = firebase.messaging();
+            var messaging = firebase.messaging(app);
             return messaging.getToken({
                 vapidKey: "BIJImK19REAXSKC7s8hOGIzQ904lIOmOTdXUOeUkxcCJF2T2AlFsvGkLhTsRFJXuQfekIWs32vLuPXj0XMIpGCY",
                 serviceWorkerRegistration: registration

@@ -2,6 +2,7 @@ var products = [];
 
 var cart = [];
 var db;
+var app;
 
 document.addEventListener('DOMContentLoaded', async function() {
     initFirebase();
@@ -71,6 +72,7 @@ function initFirebase() {
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
+    app = firebase.app();
     db = firebase.firestore();
     
     if (db) {
@@ -91,35 +93,7 @@ function initFirebase() {
         });
     }
     
-    if (firebase.messaging && firebase.messaging.isSupported()) {
-        navigator.serviceWorker.register('https://stickzonetn.github.io/StickZone.tn/firebase-messaging-sw.js')
-            .then(function(registration) {
-                var messaging = firebase.messaging();
-                
-                messaging.onMessage(function(payload) {
-                    console.log('Message received:', payload);
-                    if (payload.notification) {
-                        new Notification(payload.notification.title, {
-                            body: payload.notification.body,
-                            icon: 'logo.png'
-                        });
-                    }
-                });
-                
-                messaging.getToken({
-                    vapidKey: "BIJImK19REAXSKC7s8hOGIzQ904lIOmOTdXUOeUkxcCJF2T2AlFsvGkLhTsRFJXuQfekIWs32vLuPXj0XMIpGCY",
-                    serviceWorkerRegistration: registration
-                })
-                    .then(function(currentToken) {
-            if (currentToken) {
-                console.log('FCM Token:', currentToken);
-                localStorage.setItem('fcm_token', currentToken);
-                saveTokenToFirebase(currentToken);
-            }
-        }).catch(function(err) {
-            console.log('Error getting FCM token:', err);
-        });
-    }
+    // Messaging is handled elsewhere
 }
 
 async function saveTokenToFirebase(token) {
