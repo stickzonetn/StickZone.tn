@@ -1,17 +1,4 @@
-var products = [
-    { id: 1, name: 'Cute Cat Sticker', category: 'cartoon', image: 'https://picsum.photos/seed/cat/400/400', emoji: '🐱', price: 9.00, originalPrice: 15.00, description: 'Adorable kawaii cat design!', badge: 'Bestseller' },
-    { id: 2, name: 'Space Explorer', category: 'cartoon', image: 'https://picsum.photos/seed/space/400/400', emoji: '🚀', price: 10.50, originalPrice: null, description: 'Reach for the stars!', badge: null },
-    { id: 3, name: 'Sunset Paradise', category: 'nature', image: 'https://picsum.photos/seed/sunset/400/400', emoji: '🌅', price: 9.00, originalPrice: null, description: 'Beautiful sunset landscape.', badge: null },
-    { id: 4, name: 'Forest Vibes', category: 'nature', image: 'https://picsum.photos/seed/forest/400/400', emoji: '🌲', price: 9.90, originalPrice: 13.50, description: 'Peaceful forest scene.', badge: 'Popular' },
-    { id: 5, name: 'Dream Big', category: 'quote', image: 'https://picsum.photos/seed/dream/400/400', emoji: '✨', price: 7.50, originalPrice: null, description: 'Inspirational quote sticker.', badge: null },
-    { id: 6, name: 'Stay Positive', category: 'quote', image: 'https://picsum.photos/seed/positive/400/400', emoji: '🌸', price: 7.50, originalPrice: null, description: 'Simple yet powerful message.', badge: null },
-    { id: 7, name: 'Abstract Dreams', category: 'abstract', image: 'https://picsum.photos/seed/abstract/400/400', emoji: '🎨', price: 12.00, originalPrice: 18.00, description: 'Colorful abstract art.', badge: 'Sale' },
-    { id: 8, name: 'Geometric Magic', category: 'abstract', image: 'https://picsum.photos/seed/geometric/400/400', emoji: '💎', price: 10.50, originalPrice: null, description: 'Mesmerizing geometric pattern.', badge: null },
-    { id: 9, name: 'Happy Corgi', category: 'cartoon', image: 'https://picsum.photos/seed/corgi/400/400', emoji: '🐕', price: 9.90, originalPrice: null, description: 'The happiest corgi!', badge: null },
-    { id: 10, name: 'Ocean Waves', category: 'nature', image: 'https://picsum.photos/seed/ocean/400/400', emoji: '🌊', price: 9.00, originalPrice: 12.00, description: 'Relaxing ocean waves.', badge: 'Popular' },
-    { id: 11, name: 'Unicorn Magic', category: 'cartoon', image: 'https://picsum.photos/seed/unicorn/400/400', emoji: '🦄', price: 10.50, originalPrice: null, description: 'Magical unicorn design.', badge: null },
-    { id: 12, name: 'Flower Power', category: 'nature', image: 'https://picsum.photos/seed/flower/400/400', emoji: '🌸', price: 7.50, originalPrice: null, description: 'Beautiful floral design.', badge: null }
-];
+var products = [];
 
 var cart = [];
 var db;
