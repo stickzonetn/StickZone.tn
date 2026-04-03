@@ -1262,15 +1262,6 @@ function syncCategoriesToIndex() {
     var cats = getCategories();
     localStorage.setItem('stickzone_categories', JSON.stringify(cats));
 }
-    
-    cat.name = newName.trim().toLowerCase();
-    cat.icon = newIcon.trim();
-    
-    saveCategories(cats);
-    renderCategories();
-    updateCategorySelect();
-    showToast('Category updated!', 'success');
-}
 
 function updateCategorySelect() {
     var select = document.getElementById('newProductCategory');
