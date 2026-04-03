@@ -97,7 +97,9 @@ function initFirebase() {
     }
     
     if (firebase.messaging && firebase.messaging.isSupported()) {
-        var messaging = firebase.messaging();
+        var messaging = firebase.messaging({
+            vapidKey: "BIJImK19REAXSKC7s8hOGIzQ904lIOmOTdXUOeUkxcCJF2T2AlFsvGkLhTsRFJXuQfekIWs32vLuPXj0XMIpGCY"
+        });
         
         messaging.onMessage(function(payload) {
             console.log('Message received in admin:', payload);
@@ -109,7 +111,8 @@ function initFirebase() {
             }
         });
         
-        messaging.getToken({ vapidKey: "BIJImK19REAXSKC7s8hOGIzQ904lIOmOTdXUOeUkxcCJF2T2AlFsvGkLhTsRFJXuQfekIWs32vLuPXj0XMIpGCY" }).then(function(currentToken) {
+        messaging.getToken()
+            .then(function(currentToken) {
             if (currentToken) {
                 console.log('Admin FCM Token:', currentToken);
                 localStorage.setItem('admin_fcm_token', currentToken);
@@ -1132,9 +1135,11 @@ function getFCMToken() {
         return;
     }
     
-    var messaging = firebase.messaging();
+    var messaging = firebase.messaging({
+        vapidKey: "BIJImK19REAXSKC7s8hOGIzQ904lIOmOTdXUOeUkxcCJF2T2AlFsvGkLhTsRFJXuQfekIWs32vLuPXj0XMIpGCY"
+    });
     
-    messaging.getToken({ vapidKey: "BIJImK19REAXSKC7s8hOGIzQ904lIOmOTdXUOeUkxcCJF2T2AlFsvGkLhTsRFJXuQfekIWs32vLuPXj0XMIpGCY" })
+    messaging.getToken()
         .then(function(currentToken) {
             if (currentToken) {
                 console.log('FCM Registration Token:', currentToken);
