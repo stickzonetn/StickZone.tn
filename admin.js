@@ -97,30 +97,36 @@ function initFirebase() {
     }
     
     if (firebase.messaging && firebase.messaging.isSupported()) {
-        var messaging = firebase.messaging({
-            vapidKey: "BIJImK19REAXSKC7s8hOGIzQ904lIOmOTdXUOeUkxcCJF2T2AlFsvGkLhTsRFJXuQfekIWs32vLuPXj0XMIpGCY",
-            serviceWorkerRegistration: navigator.serviceWorker.register('https://stickzonetn.github.io/StickZone.tn/firebase-messaging-sw.js')
-        });
-        
-        messaging.onMessage(function(payload) {
-            console.log('Message received in admin:', payload);
-            if (payload.notification) {
-                new Notification(payload.notification.title, {
-                    body: payload.notification.body,
-                    icon: 'logo.png'
+        navigator.serviceWorker.register('https://stickzonetn.github.io/StickZone.tn/firebase-messaging-sw.js')
+            .then(function(registration) {
+                var messaging = firebase.messaging();
+                
+                messaging.onMessage(function(payload) {
+                    console.log('Message received in admin:', payload);
+                    if (payload.notification) {
+                        new Notification(payload.notification.title, {
+                            body: payload.notification.body,
+                            icon: 'logo.png'
+                        });
+                    }
                 });
-            }
-        });
-        
-        messaging.getToken()
-            .then(function(currentToken) {
-            if (currentToken) {
-                console.log('Admin FCM Token:', currentToken);
-                localStorage.setItem('admin_fcm_token', currentToken);
-            }
-        }).catch(function(err) {
-            console.log('Error getting admin FCM token:', err);
-        });
+                
+                messaging.getToken({
+                    vapidKey: "BIJImK19REAXSKC7s8hOGIzQ904lIOmOTdXUOeUkxcCJF2T2AlFsvGkLhTsRFJXuQfekIWs32vLuPXj0XMIpGCY",
+                    serviceWorkerRegistration: registration
+                })
+                    .then(function(currentToken) {
+                    if (currentToken) {
+                        console.log('Admin FCM Token:', currentToken);
+                        localStorage.setItem('admin_fcm_token', currentToken);
+                    }
+                }).catch(function(err) {
+                    console.log('Error getting admin FCM token:', err);
+                });
+            })
+            .catch(function(err) {
+                console.log('Service worker registration failed:', err);
+            });
     }
 }
 
@@ -1136,12 +1142,14 @@ function getFCMToken() {
         return;
     }
     
-    var messaging = firebase.messaging({
-        vapidKey: "BIJImK19REAXSKC7s8hOGIzQ904lIOmOTdXUOeUkxcCJF2T2AlFsvGkLhTsRFJXuQfekIWs32vLuPXj0XMIpGCY",
-        serviceWorkerRegistration: navigator.serviceWorker.register('https://stickzonetn.github.io/StickZone.tn/firebase-messaging-sw.js')
-    });
-    
-    messaging.getToken()
+    navigator.serviceWorker.register('https://stickzonetn.github.io/StickZone.tn/firebase-messaging-sw.js')
+        .then(function(registration) {
+            var messaging = firebase.messaging();
+            return messaging.getToken({
+                vapidKey: "BIJImK19REAXSKC7s8hOGIzQ904lIOmOTdXUOeUkxcCJF2T2AlFsvGkLhTsRFJXuQfekIWs32vLuPXj0XMIpGCY",
+                serviceWorkerRegistration: registration
+            });
+        })
         .then(function(currentToken) {
             if (currentToken) {
                 console.log('FCM Registration Token:', currentToken);

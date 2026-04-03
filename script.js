@@ -92,23 +92,25 @@ function initFirebase() {
     }
     
     if (firebase.messaging && firebase.messaging.isSupported()) {
-        var messaging = firebase.messaging({
-            vapidKey: "BIJImK19REAXSKC7s8hOGIzQ904lIOmOTdXUOeUkxcCJF2T2AlFsvGkLhTsRFJXuQfekIWs32vLuPXj0XMIpGCY",
-            serviceWorkerRegistration: navigator.serviceWorker.register('https://stickzonetn.github.io/StickZone.tn/firebase-messaging-sw.js')
-        });
-        
-        messaging.onMessage(function(payload) {
-            console.log('Message received:', payload);
-            if (payload.notification) {
-                new Notification(payload.notification.title, {
-                    body: payload.notification.body,
-                    icon: 'logo.png'
+        navigator.serviceWorker.register('https://stickzonetn.github.io/StickZone.tn/firebase-messaging-sw.js')
+            .then(function(registration) {
+                var messaging = firebase.messaging();
+                
+                messaging.onMessage(function(payload) {
+                    console.log('Message received:', payload);
+                    if (payload.notification) {
+                        new Notification(payload.notification.title, {
+                            body: payload.notification.body,
+                            icon: 'logo.png'
+                        });
+                    }
                 });
-            }
-        });
-        
-        messaging.getToken()
-            .then(function(currentToken) {
+                
+                messaging.getToken({
+                    vapidKey: "BIJImK19REAXSKC7s8hOGIzQ904lIOmOTdXUOeUkxcCJF2T2AlFsvGkLhTsRFJXuQfekIWs32vLuPXj0XMIpGCY",
+                    serviceWorkerRegistration: registration
+                })
+                    .then(function(currentToken) {
             if (currentToken) {
                 console.log('FCM Token:', currentToken);
                 localStorage.setItem('fcm_token', currentToken);
