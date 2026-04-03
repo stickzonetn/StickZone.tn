@@ -98,7 +98,8 @@ function initFirebase() {
     
     if (firebase.messaging && firebase.messaging.isSupported()) {
         var messaging = firebase.messaging({
-            vapidKey: "BIJImK19REAXSKC7s8hOGIzQ904lIOmOTdXUOeUkxcCJF2T2AlFsvGkLhTsRFJXuQfekIWs32vLuPXj0XMIpGCY"
+            vapidKey: "BIJImK19REAXSKC7s8hOGIzQ904lIOmOTdXUOeUkxcCJF2T2AlFsvGkLhTsRFJXuQfekIWs32vLuPXj0XMIpGCY",
+            serviceWorkerRegistration: navigator.serviceWorker.register('https://stickzonetn.github.io/StickZone.tn/firebase-messaging-sw.js')
         });
         
         messaging.onMessage(function(payload) {
@@ -1136,7 +1137,8 @@ function getFCMToken() {
     }
     
     var messaging = firebase.messaging({
-        vapidKey: "BIJImK19REAXSKC7s8hOGIzQ904lIOmOTdXUOeUkxcCJF2T2AlFsvGkLhTsRFJXuQfekIWs32vLuPXj0XMIpGCY"
+        vapidKey: "BIJImK19REAXSKC7s8hOGIzQ904lIOmOTdXUOeUkxcCJF2T2AlFsvGkLhTsRFJXuQfekIWs32vLuPXj0XMIpGCY",
+        serviceWorkerRegistration: navigator.serviceWorker.register('https://stickzonetn.github.io/StickZone.tn/firebase-messaging-sw.js')
     });
     
     messaging.getToken()
