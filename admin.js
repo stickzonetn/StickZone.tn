@@ -388,7 +388,7 @@ function checkForNewVisitors() {
     
     if (stats.total > lastVisitorCount && lastVisitorCount > 0) {
         var newCount = stats.total - lastVisitorCount;
-        showToast('🔔 ' + newCount + ' new visitor(s)!', 'info');
+        showToast('ðŸ”” ' + newCount + ' new visitor(s)!', 'info');
         if (badge) {
             badge.textContent = newCount;
             badge.style.display = 'flex';
@@ -830,7 +830,7 @@ function viewOrderDetail(orderId) {
     var itemsHTML = '';
     if (order.items && order.items.length > 0) {
         itemsHTML = order.items.map(function(item) {
-            return '<div class="order-item"><div class="order-item-info"><span class="order-item-img">' + (item.emoji || '📦') + '</span><span class="order-item-name">' + item.name + '</span><span class="order-item-qty">x' + item.quantity + '</span></div><span class="order-item-price">' + (item.price * item.quantity).toFixed(2) + ' DT</span></div>';
+            return '<div class="order-item"><div class="order-item-info"><span class="order-item-img">' + (item.emoji || 'ðŸ“¦') + '</span><span class="order-item-name">' + item.name + '</span><span class="order-item-qty">x' + item.quantity + '</span></div><span class="order-item-price">' + (item.price * item.quantity).toFixed(2) + ' DT</span></div>';
         }).join('');
     } else {
         itemsHTML = '<p>No items</p>';
