@@ -79,6 +79,21 @@ function initFirebase() {
                 }
             });
         });
+        
+        db.collection('pushNotifications').onSnapshot(function(snapshot) {
+            snapshot.docChanges().forEach(function(change) {
+                if (change.type === 'added') {
+                    var data = change.doc.data();
+                    if (data.notification) {
+                        showNewOrderNotification({ 
+                            customer: { name: data.notification.body },
+                            total: 0
+                        });
+                    }
+                    change.doc.ref.delete();
+                }
+            });
+        });
     }
     
     if (firebase.messaging && firebase.messaging.isSupported()) {
@@ -416,8 +431,24 @@ function logout() {
 async function loadAdminData() {
     products = getProducts();
     orders = getOrders();
+    categories = getCategories();
     
     if (db) {
+        try {
+            var firebaseCategories = await db.collection('categories').get();
+            if (!firebaseCategories.empty) {
+                categories = firebaseCategories.docs.map(function(doc) {
+                    var data = doc.data();
+                    data.id = Number(doc.id);
+                    return data;
+                });
+                saveCategories(categories);
+                syncCategoriesToIndex();
+            }
+        } catch (e) {
+            console.log('Using local categories (Firebase unavailable):', e);
+        }
+        
         try {
             var firebaseProducts = await getProductsFromFirebase();
             if (firebaseProducts.success && firebaseProducts.products && firebaseProducts.products.length > 0) {
@@ -889,6 +920,7 @@ function showTab(tabName) {
     document.getElementById('productsTab').style.display = 'none';
     document.getElementById('ordersTab').style.display = 'none';
     document.getElementById('messagesTab').style.display = 'none';
+    document.getElementById('categoriesTab').style.display = 'none';
     document.getElementById('addProductTab').style.display = 'none';
     document.getElementById('analyticsTab').style.display = 'none';
     
@@ -918,12 +950,17 @@ function showTab(tabName) {
         document.getElementById('messagesTab').style.display = 'block';
         document.querySelectorAll('.nav-btn')[2].classList.add('active');
         renderMessages();
+    } else if (tabName === 'categories') {
+        document.getElementById('categoriesTab').style.display = 'block';
+        document.querySelectorAll('.nav-btn')[3].classList.add('active');
+        renderCategories();
     } else if (tabName === 'add-product') {
         document.getElementById('addProductTab').style.display = 'block';
-        document.querySelectorAll('.nav-btn')[3].classList.add('active');
+        document.querySelectorAll('.nav-btn')[4].classList.add('active');
+        updateCategorySelect();
     } else if (tabName === 'analytics') {
         document.getElementById('analyticsTab').style.display = 'block';
-        document.querySelectorAll('.nav-btn')[4].classList.add('active');
+        document.querySelectorAll('.nav-btn')[5].classList.add('active');
         renderVisitorStats();
         renderVisitorsTable();
         setInterval(function() {
@@ -1083,3 +1120,171 @@ document.addEventListener('DOMContentLoaded', function() {
         try { filterOrders(); } catch(e) {}
     }, 200);
 });
+
+var categories = [
+    { id: 1, name: 'cartoon', icon: 'fa-smile' },
+    { id: 2, name: 'nature', icon: 'fa-leaf' },
+    { id: 3, name: 'quote', icon: 'fa-quote-left' },
+    { id: 4, name: 'abstract', icon: 'fa-palette' },
+    { id: 5, name: 'animal', icon: 'fa-paw' },
+    { id: 6, name: 'food', icon: 'fa-hamburger' },
+    { id: 7, name: 'travel', icon: 'fa-plane' },
+    { id: 8, name: 'sports', icon: 'fa-football-ball' },
+    { id: 9, name: 'music', icon: 'fa-music' },
+    { id: 10, name: 'tech', icon: 'fa-laptop' },
+    { id: 11, name: 'holiday', icon: 'fa-gift' }
+];
+
+var categoriesKey = 'stickzone_categories';
+
+function getCategories() {
+    var stored = localStorage.getItem(categoriesKey);
+    if (stored) {
+        return JSON.parse(stored);
+    }
+    localStorage.setItem(categoriesKey, JSON.stringify(categories));
+    return categories;
+}
+
+function saveCategories(items) {
+    localStorage.setItem(categoriesKey, JSON.stringify(items));
+}
+
+function renderCategories() {
+    var list = document.getElementById('categoriesList');
+    if (!list) return;
+    
+    var cats = getCategories();
+    
+    if (cats.length === 0) {
+        list.innerHTML = '<p class="no-messages">No categories yet</p>';
+        return;
+    }
+    
+    list.innerHTML = cats.map(function(cat) {
+        return '<div class="category-card">' +
+            '<div class="category-info">' +
+                '<i class="fas ' + cat.icon + '"></i>' +
+                '<span>' + cat.name + '</span>' +
+            '</div>' +
+            '<div class="category-actions">' +
+                '<button class="action-btn edit-btn" onclick="editCategory(' + cat.id + ')"><i class="fas fa-edit"></i></button>' +
+                '<button class="action-btn delete-btn" onclick="deleteCategory(' + cat.id + ')"><i class="fas fa-trash"></i></button>' +
+            '</div>' +
+        '</div>';
+    }).join('');
+}
+
+function addCategory() {
+    var name = document.getElementById('newCategoryName').value.trim();
+    var icon = document.getElementById('newCategoryIcon').value.trim() || 'fa-tag';
+    
+    if (!name) {
+        showToast('Please enter category name', 'error');
+        return;
+    }
+    
+    var cats = getCategories();
+    if (cats.some(function(c) { return c.name.toLowerCase() === name.toLowerCase(); })) {
+        showToast('Category already exists', 'error');
+        return;
+    }
+    
+    var newId = Math.max.apply(null, cats.map(function(c) { return c.id; }), 0) + 1;
+    var newCat = { id: newId, name: name.toLowerCase(), icon: icon };
+    
+    cats.push(newCat);
+    saveCategories(cats);
+    
+    if (db) {
+        db.collection('categories').doc(newId.toString()).set(newCat).catch(function(e) {
+            console.log('Error saving category to Firebase:', e);
+        });
+    }
+    
+    document.getElementById('newCategoryName').value = '';
+    document.getElementById('newCategoryIcon').value = '';
+    
+    renderCategories();
+    updateCategorySelect();
+    syncCategoriesToIndex();
+    showToast('Category added!', 'success');
+}
+
+function deleteCategory(catId) {
+    if (!confirm('Delete this category? Products using it will not be affected.')) return;
+    
+    var cats = getCategories();
+    var catToDelete = cats.find(function(c) { return c.id === catId; });
+    cats = cats.filter(function(c) { return c.id !== catId; });
+    saveCategories(cats);
+    
+    if (db && catToDelete) {
+        db.collection('categories').doc(catId.toString()).delete().catch(function(e) {
+            console.log('Error deleting category from Firebase:', e);
+        });
+    }
+    
+    renderCategories();
+    syncCategoriesToIndex();
+    showToast('Category deleted!', 'success');
+}
+
+function editCategory(catId) {
+    var cats = getCategories();
+    var cat = cats.find(function(c) { return c.id === catId; });
+    if (!cat) return;
+    
+    var newName = prompt('Category name:', cat.name);
+    if (!newName || newName.trim() === '') return;
+    
+    var newIcon = prompt('Icon (Font Awesome class):', cat.icon);
+    if (!newIcon || newIcon.trim() === '') return;
+    
+    cat.name = newName.trim().toLowerCase();
+    cat.icon = newIcon.trim();
+    
+    saveCategories(cats);
+    
+    if (db) {
+        db.collection('categories').doc(catId.toString()).set(cat).catch(function(e) {
+            console.log('Error updating category in Firebase:', e);
+        });
+    }
+    
+    renderCategories();
+    updateCategorySelect();
+    syncCategoriesToIndex();
+    showToast('Category updated!', 'success');
+}
+
+function syncCategoriesToIndex() {
+    var cats = getCategories();
+    localStorage.setItem('stickzone_categories', JSON.stringify(cats));
+}
+    
+    cat.name = newName.trim().toLowerCase();
+    cat.icon = newIcon.trim();
+    
+    saveCategories(cats);
+    renderCategories();
+    updateCategorySelect();
+    showToast('Category updated!', 'success');
+}
+
+function updateCategorySelect() {
+    var select = document.getElementById('newProductCategory');
+    if (!select) return;
+    
+    var cats = getCategories();
+    select.innerHTML = '<option value="">Select category</option>' +
+        cats.map(function(c) {
+            return '<option value="' + c.name + '">' + c.name.charAt(0).toUpperCase() + c.name.slice(1) + '</option>';
+        }).join('');
+}
+
+window.addCategory = addCategory;
+window.deleteCategory = deleteCategory;
+window.editCategory = editCategory;
+window.updateCategorySelect = updateCategorySelect;
+window.syncCategoriesToIndex = syncCategoriesToIndex;

@@ -8,11 +8,54 @@ document.addEventListener('DOMContentLoaded', async function() {
     loadTheme();
     await loadProductsFromFirebase();
     renderProducts(products);
+    loadCategoriesForIndex();
     setupFilters();
     checkAdminLogin();
     trackVisitor();
-    requestNotificationPermission();
 });
+
+var categories = [];
+
+function loadCategoriesForIndex() {
+    var stored = localStorage.getItem('stickzone_categories');
+    if (stored) {
+        categories = JSON.parse(stored);
+    }
+    renderCategoryFilters();
+}
+
+function renderCategoryFilters() {
+    var container = document.querySelector('.filters');
+    if (!container) return;
+    
+    var filterHtml = '<button class="filter-btn active" data-category="all">All</button>';
+    
+    categories.forEach(function(cat) {
+        filterHtml += '<button class="filter-btn" data-category="' + cat.name + '">' + 
+            cat.name.charAt(0).toUpperCase() + cat.name.slice(1) + '</button>';
+    });
+    
+    container.innerHTML = filterHtml;
+    
+    var filterBtns = document.querySelectorAll('.filter-btn');
+    filterBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            filterBtns.forEach(function(b) { b.classList.remove('active'); });
+            this.classList.add('active');
+            var category = this.getAttribute('data-category');
+            filterProductsByCategory(category);
+        });
+    });
+}
+
+function filterProductsByCategory(category) {
+    if (category === 'all') {
+        renderProducts(products);
+    } else {
+        var filtered = products.filter(function(p) { return p.category === category; });
+        renderProducts(filtered);
+    }
+}
 
 function initFirebase() {
     var firebaseConfig = {
@@ -120,6 +163,8 @@ async function saveOrderToFirebase(order) {
 }
 
 async function sendPushNotification(order) {
+    var adminToken = 'YOUR_ADMIN_FCM_TOKEN_HERE';
+    
     try {
         var notification = {
             title: 'New Order Received!',
@@ -137,12 +182,13 @@ async function sendPushNotification(order) {
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         
-        if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification(notification.title, {
-                body: notification.body,
-                icon: notification.icon
-            });
-        }
+        await db.collection('pushNotifications').add({
+            token: adminToken,
+            notification: notification,
+            orderId: order.id,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
     } catch (error) {
         console.log('Notification error:', error);
     }

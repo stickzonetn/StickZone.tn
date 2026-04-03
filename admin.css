@@ -1364,20 +1364,33 @@ a, button, input, textarea, select {
 }
 
 @media (max-width: 768px) {
+    html {
+        scroll-behavior: smooth;
+    }
+    
+    body {
+        -webkit-overflow-scrolling: touch;
+    }
+    
     .admin-header {
         flex-wrap: wrap;
         height: auto;
-        padding: 12px 15px;
-        gap: 12px;
+        padding: 10px 12px;
+        gap: 10px;
+        position: relative;
     }
     
     .admin-logo {
-        font-size: 1.1rem;
+        font-size: 1rem;
     }
     
     .admin-logo img {
-        width: 32px;
-        height: 32px;
+        width: 30px;
+        height: 30px;
+    }
+    
+    .admin-logo span {
+        display: none;
     }
     
     .admin-nav {
@@ -1388,45 +1401,76 @@ a, button, input, textarea, select {
         justify-content: flex-start;
         gap: 4px;
         -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    
+    .admin-nav::-webkit-scrollbar {
+        display: none;
     }
     
     .nav-btn {
-        font-size: 0.8rem;
-        padding: 8px 12px;
+        font-size: 0.75rem;
+        padding: 8px 10px;
         white-space: nowrap;
+        transition: all 0.2s ease;
+    }
+    
+    .nav-btn:active {
+        transform: scale(0.95);
     }
     
     .nav-btn i {
-        margin-right: 4px;
+        margin-right: 3px;
+        font-size: 0.85rem;
+    }
+    
+    .nav-btn span:not(.order-count) {
+        display: none;
+    }
+    
+    .order-count {
+        font-size: 0.6rem;
+        padding: 2px 5px;
     }
     
     .admin-actions {
-        gap: 8px;
+        gap: 6px;
+        margin-left: auto;
     }
     
     .visitor-notification,
     .theme-toggle {
-        width: 32px;
-        height: 32px;
-        font-size: 0.85rem;
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
     }
     
     .admin-user {
-        padding: 6px 10px;
-        font-size: 0.8rem;
+        padding: 5px 8px;
+        font-size: 0.75rem;
+    }
+    
+    .admin-user span {
+        display: none;
     }
     
     .logout-btn {
-        padding: 6px 12px;
-        font-size: 0.8rem;
+        padding: 6px 10px;
+        font-size: 0.75rem;
     }
     
     .logout-btn span {
         display: none;
     }
     
+    .logout-btn i {
+        margin: 0;
+    }
+    
     .admin-content {
-        padding: 15px;
+        padding: 12px;
+        overflow-x: hidden;
     }
     
     .tab-header {
@@ -1475,27 +1519,128 @@ a, button, input, textarea, select {
     
     .products-table-container {
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
     
     .products-table {
-        min-width: 600px;
+        min-width: 500px;
+        font-size: 0.85rem;
+    }
+    
+    .products-table th,
+    .products-table td {
+        padding: 12px 8px;
+    }
+    
+    .orders-table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
     
     .orders-table th,
     .orders-table td {
-        padding: 12px;
-        font-size: 0.85rem;
+        padding: 10px 8px;
+        font-size: 0.8rem;
     }
     
     .add-product-form {
-        padding: 20px;
+        padding: 15px;
     }
     
-    .form-actions {
+    .add-category-form {
+        padding: 15px;
+    }
+    
+    .add-category-form .form-row {
         flex-direction: column;
     }
     
-    .form-actions .btn {
-        width: 100%;
+    .categories-list {
+        grid-template-columns: 1fr;
     }
+    
+    .modal-content {
+        padding: 20px;
+        margin: 10px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .order-detail-modal {
+        max-width: 95%;
+    }
+    
+    .order-actions {
+        flex-direction: column;
+    }
+    
+    .order-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .action-btns {
+        flex-wrap: wrap;
+    }
+    
+    .action-btn {
+        width: 30px;
+        height: 30px;
+    }
+}
+
+.add-category-form {
+    background: var(--bg-main);
+    padding: 25px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 30px;
+    max-width: 600px;
+}
+
+.add-category-form .form-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.add-category-form .form-group {
+    flex: 1;
+}
+
+.categories-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.category-card {
+    background: var(--bg-main);
+    padding: 20px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.category-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.category-info i {
+    font-size: 1.2rem;
+    color: var(--primary);
+}
+
+.category-info span {
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.category-actions {
+    display: flex;
+    gap: 8px;
 }
