@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StickZone - Custom Stickers for Sale</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="logo.png">
+    <script>document.documentElement.setAttribute('data-theme', 'dark');</script>
+</head>
+<body>
+    <!-- Floating Chat Button -->
+    <a href="#" class="float-chat" onclick="toggleChat(); return false;">
+        <i class="fas fa-comments"></i>
+    </a>
+    <!-- Support Chat Widget -->
+    <div class="support-chat" id="supportChat">
+        <div class="chat-header" onclick="toggleChat()">
+            <span><i class="fas fa-headset"></i> Support Chat</span>
+            <i class="fas fa-chevron-up" id="chatArrow"></i>
+        </div>
+        <div class="chat-body" id="chatBody">
+            <div class="chat-messages" id="chatMessages">
+                <div class="chat-message bot">
+                    <p>👋 Hi! Welcome to StickZone!</p>
+                    <p>How can we help you today?</p>
+                </div>
+            </div>
+            <form class="chat-input" onsubmit="sendChatMessage(event)">
+                <input type="text" placeholder="Type a message..." id="chatInput">
+                <button type="submit"><i class="fas fa-paper-plane"></i></button>
+            </form>
+        </div>
+    </div>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+    <!-- Header -->
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <img src="logo.png" alt="StickZone Logo" class="logo-img">
+                <span>StickZone</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#products">Shop</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+            <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
+            <div class="cart-icon" onclick="toggleCart()">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count" id="cartCount">0</span>
+            </div>
+            <div class="hamburger" onclick="toggleMenu()">
+                <i class="fas fa-bars"></i>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h1>Express Yourself with <span class="highlight">Custom Stickers</span></h1>
+            <p>High-quality, waterproof stickers in various sizes and shapes. Perfect for laptops, phones, water bottles, and more!</p>
+            <a href="#products" class="btn btn-primary">Shop Now</a>
+        </div>
+        <div class="hero-image">
+            <div class="sticker-showcase">
+                <img src="logo.png" alt="StickZone Logo" class="hero-showcase-logo">
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features">
+        <div class="feature">
+            <i class="fas fa-shipping-fast"></i>
+            <h3>Free Shipping</h3>
+            <p>Free delivery on all orders</p>
+        </div>
+        <div class="feature">
+            <i class="fas fa-water"></i>
+            <h3>Waterproof</h3>
+            <p>Durable & weather-resistant</p>
+        </div>
+        <div class="feature">
+            <i class="fas fa-star"></i>
+            <h3>Premium Quality</h3>
+            <p>Vibrant colors that last</p>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section class="products" id="products">
+        <div class="section-header">
+            <h2>Our Sticker Collection</h2>
+            <p>Choose from our amazing collection of stickers</p>
+        </div>
+        
+        <div class="product-controls">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search stickers..." oninput="searchProducts()">
+            </div>
+            <div class="sort-box">
+                <label>Sort by:</label>
+                <select id="sortSelect" onchange="sortProducts()">
+                    <option value="default">Default</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                    <option value="name">Name: A-Z</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="filters">
+            <button class="filter-btn active" data-category="all">All</button>
+            <button class="filter-btn" data-category="cartoon">Cartoon</button>
+            <button class="filter-btn" data-category="nature">Nature</button>
+            <button class="filter-btn" data-category="quote">Quotes</button>
+            <button class="filter-btn" data-category="abstract">Abstract</button>
+            <button class="filter-btn" data-category="animal">Animals</button>
+            <button class="filter-btn" data-category="food">Food</button>
+            <button class="filter-btn" data-category="travel">Travel</button>
+            <button class="filter-btn" data-category="sports">Sports</button>
+            <button class="filter-btn" data-category="music">Music</button>
+            <button class="filter-btn" data-category="tech">Tech</button>
+            <button class="filter-btn" data-category="holiday">Holiday</button>
+        </div>
+
+        <div class="product-grid" id="productGrid">
+            <!-- Products will be rendered by JavaScript -->
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="about">
+        <div class="about-content">
+            <h2>About StickZone</h2>
+            <p>We're passionate about helping you express your unique personality through custom stickers. Founded in 2024, our mission is to bring creativity to life with premium quality stickers that stick (pun intended!).</p>
+            <p>Every sticker is carefully crafted using premium materials to ensure vibrant colors and long-lasting durability. Whether you're decorating your laptop, creating custom merch, or starting a sticker collection, we've got you covered!</p>
+            <div class="about-stats">
+                <div class="stat">
+                    <span class="stat-number">500+</span>
+                    <span class="stat-label">Happy Customers</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">500+</span>
+                    <span class="stat-label">Designs</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">4.9</span>
+                    <span class="stat-label">Rating</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>StickZone</h3>
+                <p>Your destination for premium custom stickers.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-tiktok"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#products">Shop</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Customer Service</h3>
+                <ul>
+                    <li><a href="#">Shipping Info</a></li>
+                    <li><a href="#">Returns</a></li>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 StickZone. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Shopping Cart Sidebar -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3>Your Cart</h3>
+            <button class="close-cart" onclick="toggleCart()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="cart-items" id="cartItems">
+            <p class="empty-cart">Your cart is empty</p>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total:</span>
+                <span id="cartTotal">0.00 DT</span>
+            </div>
+            <button class="btn btn-primary checkout-btn" onclick="checkout()">
+                Proceed to Checkout (Min. 20 stickers)
+            </button>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div class="modal" id="checkoutModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeCheckout()">&times;</span>
+            <h2>Checkout</h2>
+            <form id="checkoutForm" onsubmit="handleCheckout(event)">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Address</label>
+                    <input type="text" id="address" required>
+                </div>
+                <div class="form-group">
+                    <label>Shipping Method</label>
+                    <div class="shipping-options">
+                        <label class="shipping-option" onclick="selectShipping('standard')">
+                            <input type="radio" name="shipping" value="standard" checked>
+                            <span class="shipping-radio"></span>
+                            <i class="fas fa-truck"></i>
+                            <div class="shipping-info">
+                                <span class="shipping-name">Standard Delivery</span>
+                                <span class="shipping-time">3-5 Business Days</span>
+                            </div>
+                            <span class="shipping-price">FREE</span>
+                        </label>
+                        <label class="shipping-option" onclick="selectShipping('express')">
+                            <input type="radio" name="shipping" value="express">
+                            <span class="shipping-radio"></span>
+                            <i class="fas fa-shipping-fast"></i>
+                            <div class="shipping-info">
+                                <span class="shipping-name">Express Delivery</span>
+                                <span class="shipping-time">1-2 Business Days</span>
+                            </div>
+                            <span class="shipping-price">8.00 DT</span>
+                        </label>
+                        <label class="shipping-option" onclick="selectShipping('pickup')">
+                            <input type="radio" name="shipping" value="pickup">
+                            <span class="shipping-radio"></span>
+                            <i class="fas fa-store"></i>
+                            <div class="shipping-info">
+                                <span class="shipping-name">Store Pickup</span>
+                                <span class="shipping-time">Pick up from store</span>
+                            </div>
+                            <span class="shipping-price">FREE</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Payment Method</label>
+                    <div class="payment-options">
+                        <label class="payment-option">
+                            <input type="radio" name="payment" value="cod" checked>
+                            <span class="payment-radio"></span>
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span>Cash on Delivery</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="checkout-summary">
+                    <div class="summary-row">
+                        <span>Subtotal:</span>
+                        <span id="checkoutSubtotal">0.00 DT</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Shipping:</span>
+                        <span id="checkoutShipping">FREE</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total:</span>
+                        <span id="checkoutTotal">0.00 DT</span>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Place Order</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Order Success Modal -->
+    <div class="modal" id="successModal">
+        <div class="modal-content success-content">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2>Order Placed Successfully!</h2>
+            <p>Thank you for your order! You will pay <strong id="codAmount">0.00 DT</strong> in cash when your order is delivered.</p>
+            <p>A confirmation email has been sent to your email address.</p>
+            <button class="btn btn-primary" onclick="closeSuccess()">Continue Shopping</button>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="closeAll()"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

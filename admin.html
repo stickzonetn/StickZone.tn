@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StickZone Admin Panel</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="admin.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="logo.png">
+    <script>document.documentElement.setAttribute('data-theme', 'dark');</script>
+</head>
+<body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+    <!-- Login Screen -->
+    <div class="admin-login" id="adminLogin">
+        <div class="login-container">
+            <div class="login-icon">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <h2>Admin Login</h2>
+            <p>Enter your credentials to access the admin panel</p>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="adminUsername" placeholder="Enter username" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="adminPassword" placeholder="Enter password" required>
+                </div>
+                <div class="error-message" id="loginError"></div>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+            <a href="index.html" class="back-link">
+                <i class="fas fa-arrow-left"></i> Back to Store
+            </a>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div class="admin-dashboard" id="adminDashboard" style="display: none;">
+        <header class="admin-header">
+            <div class="admin-logo">
+                <img src="logo.png" alt="StickZone Logo" class="logo-img">
+                <span>StickZone Admin</span>
+            </div>
+            <nav class="admin-nav">
+                <button class="nav-btn active" onclick="showTab('products')">
+                    <i class="fas fa-box"></i> Products
+                </button>
+                <button class="nav-btn" onclick="showTab('orders')">
+                    <i class="fas fa-shopping-bag"></i> Orders
+                    <span class="order-count" id="orderCount">0</span>
+                </button>
+                <button class="nav-btn" onclick="showTab('messages')">
+                    <i class="fas fa-envelope"></i> Messages
+                    <span class="order-count" id="messageCount">0</span>
+                </button>
+                <button class="nav-btn" onclick="showTab('add-product')">
+                    <i class="fas fa-plus-circle"></i> Add Product
+                </button>
+                <button class="nav-btn" onclick="showTab('analytics')">
+                    <i class="fas fa-chart-line"></i> Analytics
+                </button>
+            </nav>
+            <div class="admin-actions">
+                <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
+                <button class="visitor-notification" onclick="showTab('analytics')" title="Analytics">
+                    <i class="fas fa-chart-line"></i>
+                </button>
+                <div class="admin-user">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Admin</span>
+                </div>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Products Tab -->
+        <div class="admin-content" id="productsTab">
+            <div class="tab-header">
+                <h2>Product Management</h2>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search products..." id="productSearch" oninput="searchProducts()">
+                </div>
+            </div>
+            <div class="products-table-container">
+                <table class="products-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsTableBody">
+                        <!-- Products will be rendered here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Orders Tab -->
+        <div class="admin-content orders-tab" id="ordersTab" style="display: none;">
+            <div class="tab-header">
+                <h2>Order Management</h2>
+            </div>
+            
+            <!-- Order Stats -->
+            <div class="order-stats-row">
+                <div class="stat-card">
+                    <span class="stat-value" id="totalOrders">0</span>
+                    <span class="stat-label">Total Orders</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="totalRevenue">0 DT</span>
+                    <span class="stat-label">Total Revenue</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="pendingOrders">0</span>
+                    <span class="stat-label">Pending</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="completedOrders">0</span>
+                    <span class="stat-label">Completed</span>
+                </div>
+            </div>
+            
+            <!-- Order Filters -->
+            <div class="order-filters">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search orders..." id="orderSearch" oninput="filterOrders()">
+                </div>
+                <select id="orderStatusFilter" onchange="filterOrders()">
+                    <option value="all">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="completed">Completed</option>
+                </select>
+                <select id="orderDateFilter" onchange="filterOrders()">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                </select>
+                <button class="btn btn-danger" onclick="resetOrders()" title="Reset All Orders">
+                    <i class="fas fa-redo"></i> Reset Orders
+                </button>
+            </div>
+            
+            <!-- Orders Table -->
+            <div class="orders-table-wrapper" id="ordersContainer">
+                <div class="empty-state" id="emptyOrders">
+                    <i class="fas fa-shopping-bag"></i>
+                    <h3>No Orders Yet</h3>
+                    <p>Orders will appear here when customers make purchases</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages Tab -->
+        <div class="admin-content" id="messagesTab" style="display: none;">
+            <div class="tab-header">
+                <h2>Contact Messages</h2>
+                <div class="message-stats">
+                    <div class="stat-card">
+                        <span class="stat-value" id="totalMessages">0</span>
+                        <span class="stat-label">Total Messages</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value" id="unreadMessages">0</span>
+                        <span class="stat-label">Unread</span>
+                    </div>
+                </div>
+            </div>
+            <div class="messages-list" id="messagesList">
+                <p class="no-messages">No messages yet</p>
+            </div>
+        </div>
+
+        <!-- Add Product Tab -->
+        <div class="admin-content" id="addProductTab" style="display: none;">
+            <div class="tab-header">
+                <h2>Add New Product</h2>
+            </div>
+            <form class="add-product-form" onsubmit="addProduct(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Product Name *</label>
+                        <input type="text" id="newProductName" placeholder="Enter product name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Category *</label>
+                        <select id="newProductCategory" required>
+                            <option value="">Select category</option>
+                            <option value="cartoon">Cartoon</option>
+                            <option value="nature">Nature</option>
+                            <option value="quote">Quotes</option>
+                            <option value="abstract">Abstract</option>
+                            <option value="animal">Animals</option>
+                            <option value="food">Food</option>
+                            <option value="travel">Travel</option>
+                            <option value="sports">Sports</option>
+                            <option value="music">Music</option>
+                            <option value="tech">Tech</option>
+                            <option value="holiday">Holiday</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Price (DT) *</label>
+                        <input type="number" id="newProductPrice" step="0.01" min="0" placeholder="0.00" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Original Price (DT) <span class="optional">(optional)</span></label>
+                        <input type="number" id="newProductOriginalPrice" step="0.01" min="0" placeholder="0.00">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Product Image</label>
+                    <div class="emoji-input">
+                        <input type="file" id="newProductImage" accept="image/*" onchange="handleImageUpload(this)">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description *</label>
+                    <textarea id="newProductDescription" rows="3" placeholder="Enter product description" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Badge <span class="optional">(optional)</span></label>
+                    <select id="newProductBadge">
+                        <option value="">No badge</option>
+                        <option value="Bestseller">Bestseller</option>
+                        <option value="Popular">Popular</option>
+                        <option value="Sale">Sale</option>
+                        <option value="New">New</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="clearForm()">Clear</button>
+                    <button type="submit" class="btn btn-primary">Add Product</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div class="admin-content analytics-tab" id="analyticsTab" style="display: none;">
+            <div class="tab-header">
+                <h2>Visitor Analytics</h2>
+                <p>Track and manage website visitors</p>
+            </div>
+            
+            <!-- Analytics Cards - 4 per row -->
+            <div class="analytics-cards">
+                <div class="analytics-card">
+                    <div class="analytics-card-icon visitors">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="analytics-card-info">
+                        <h3>Visitors Today</h3>
+                        <p class="analytics-card-number" id="visitorsToday">0</p>
+                    </div>
+                </div>
+                <div class="analytics-card">
+                    <div class="analytics-card-icon total">
+                        <i class="fas fa-user-friends"></i>
+                    </div>
+                    <div class="analytics-card-info">
+                        <h3>Total Visitors</h3>
+                        <p class="analytics-card-number" id="totalVisitors">0</p>
+                    </div>
+                </div>
+                <div class="analytics-card">
+                    <div class="analytics-card-icon online">
+                        <i class="fas fa-signal"></i>
+                    </div>
+                    <div class="analytics-card-info">
+                        <h3>Users Online</h3>
+                        <p class="analytics-card-number" id="usersOnline">0</p>
+                    </div>
+                </div>
+                <div class="analytics-card">
+                    <div class="analytics-card-icon revenue">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="analytics-card-info">
+                        <h3>Page Views</h3>
+                        <p class="analytics-card-number" id="pageViews">0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chart Section -->
+            <div class="chart-section">
+                <h3><i class="fas fa-chart-bar"></i> Traffic Overview</h3>
+                <div class="chart-container">
+                    <canvas id="analyticsChart" width="800" height="300"></canvas>
+                </div>
+            </div>
+            
+            <!-- Visitors Table -->
+            <div class="visitors-table-section">
+                <h3><i class="fas fa-list"></i> Recent Visitors</h3>
+                <div class="table-responsive">
+                    <table class="visitors-table">
+                        <thead>
+                            <tr>
+                                <th>Visitor ID</th>
+                                <th>First Visit</th>
+                                <th>Last Visit</th>
+                                <th>Page</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="visitorsTableBody">
+                            <tr><td colspan="6">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Product Modal -->
+    <div class="modal" id="editProductModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeEditModal()">&times;</span>
+            <h2>Edit Product</h2>
+            <form onsubmit="updateProduct(event)">
+                <input type="hidden" id="editProductId">
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" id="editProductName" required>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="editProductCategory" required>
+                        <option value="cartoon">Cartoon</option>
+                        <option value="nature">Nature</option>
+                        <option value="quote">Quotes</option>
+                        <option value="abstract">Abstract</option>
+                        <option value="animal">Animals</option>
+                        <option value="food">Food</option>
+                        <option value="travel">Travel</option>
+                        <option value="sports">Sports</option>
+                        <option value="music">Music</option>
+                        <option value="tech">Tech</option>
+                        <option value="holiday">Holiday</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Product Image</label>
+                    <input type="file" id="editProductImage" accept="image/*" onchange="handleEditImageUpload(this)">
+                    <input type="hidden" id="editProductImageData">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Price (DT)</label>
+                        <input type="number" id="editProductPrice" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Original Price (DT)</label>
+                        <input type="number" id="editProductOriginalPrice" step="0.01" min="0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="editProductDescription" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Badge</label>
+                    <select id="editProductBadge">
+                        <option value="">No badge</option>
+                        <option value="Bestseller">Bestseller</option>
+                        <option value="Popular">Popular</option>
+                        <option value="Sale">Sale</option>
+                        <option value="New">New</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Update Product</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Order Detail Modal -->
+    <div class="modal" id="orderDetailModal">
+        <div class="modal-content order-detail-modal">
+            <span class="close-modal" onclick="closeOrderDetail()">&times;</span>
+            <div class="order-detail-header">
+                <h2>Order Details</h2>
+                <span class="detail-status-badge" id="detailOrderStatus"></span>
+            </div>
+            <div class="order-detail-grid">
+                <div class="order-info-section">
+                    <h3><i class="fas fa-info-circle"></i> Order Information</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">Order ID:</span>
+                        <span class="detail-value" id="detailOrderId"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Date:</span>
+                        <span class="detail-value" id="detailOrderDate"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Payment:</span>
+                        <span class="detail-value" id="detailPaymentMethod">Cash on Delivery</span>
+                    </div>
+                </div>
+                <div class="order-info-section">
+                    <h3><i class="fas fa-user"></i> Customer Information</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">Name:</span>
+                        <span class="detail-value" id="detailCustomerName"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Email:</span>
+                        <span class="detail-value" id="detailCustomerEmail"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Address:</span>
+                        <span class="detail-value" id="detailCustomerAddress"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="order-items-section">
+                <h3><i class="fas fa-box-open"></i> Order Items</h3>
+                <div class="order-items-list" id="orderItemsList"></div>
+            </div>
+            <div class="order-totals">
+                <div class="detail-row">
+                    <span class="detail-label">Subtotal:</span>
+                    <span class="detail-value" id="detailOrderSubtotal"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Shipping:</span>
+                    <span class="detail-value" id="detailOrderShipping"></span>
+                </div>
+                <div class="detail-row total">
+                    <span class="detail-label">Total:</span>
+                    <span class="detail-value" id="detailOrderTotal"></span>
+                </div>
+            </div>
+            <div class="order-actions">
+                <button class="btn btn-success" onclick="markOrderComplete()">
+                    <i class="fas fa-check-circle"></i> Mark Complete
+                </button>
+                <button class="btn btn-danger" onclick="deleteOrder(currentOrderId)">
+                    <i class="fas fa-trash"></i> Delete Order
+                </button>
+                <button class="btn btn-secondary" onclick="printOrder()">
+                    <i class="fas fa-print"></i> Print
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="adminOverlay" onclick="closeEditModal(); closeOrderDetail();"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
+
+
