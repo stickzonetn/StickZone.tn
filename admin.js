@@ -76,6 +76,23 @@ function initFirebase() {
                 }
             });
         });
+        
+        db.collection('products').onSnapshot(function(snapshot) {
+            snapshot.docChanges().forEach(function(change) {
+                if (change.type === 'added' || change.type === 'modified') {
+                    var fp = change.doc.data();
+                    fp.id = Number(change.doc.id);
+                    var existingIndex = products.findIndex(function(p) { return Number(p.id) === fp.id; });
+                    if (existingIndex >= 0) {
+                        products[existingIndex] = fp;
+                    } else {
+                        products.push(fp);
+                    }
+                    saveProducts(products);
+                    renderProductsTable();
+                }
+            });
+        });
     }
     
     if (firebase.messaging && firebase.messaging.isSupported()) {
@@ -417,35 +434,28 @@ async function loadAdminData() {
     if (db) {
         try {
             var firebaseProducts = await getProductsFromFirebase();
-            if (firebaseProducts.success && firebaseProducts.products) {
-                var localProductIds = products.map(function(p) { return Number(p.id); });
-                firebaseProducts.products.forEach(function(fp) {
-                    var fpId = Number(fp.id);
-                    if (!localProductIds.includes(fpId)) {
-                        fp.id = fpId;
-                        products.push(fp);
-                    }
+            if (firebaseProducts.success && firebaseProducts.products && firebaseProducts.products.length > 0) {
+                products = firebaseProducts.products.map(function(p) {
+                    p.id = Number(p.id);
+                    return p;
                 });
-                if (firebaseProducts.products.length > 0) {
-                    saveProducts(products);
-                }
+                saveProducts(products);
             }
         } catch (e) {
-            console.log('Using local products (Firebase unavailable)');
+            console.log('Using local products (Firebase unavailable):', e);
         }
         
         try {
             var firebaseOrders = await getOrdersFromFirebase();
-            if (firebaseOrders.success && firebaseOrders.orders) {
-                var localOrderIds = orders.map(function(o) { return Number(o.id); });
-                var newOrders = firebaseOrders.orders.filter(function(o) { return !localOrderIds.includes(Number(o.id)); });
-                if (newOrders.length > 0) {
-                    orders = orders.concat(newOrders);
-                    saveOrders(orders);
-                }
+            if (firebaseOrders.success && firebaseOrders.orders && firebaseOrders.orders.length > 0) {
+                orders = firebaseOrders.orders.map(function(o) {
+                    o.id = Number(o.id) || o.id;
+                    return o;
+                });
+                saveOrders(orders);
             }
         } catch (e) {
-            console.log('Using local orders (Firebase unavailable)');
+            console.log('Using local orders (Firebase unavailable):', e);
         }
     }
     
@@ -901,8 +911,19 @@ function showTab(tabName) {
     if (tabName === 'products') {
         document.getElementById('productsTab').style.display = 'block';
         document.querySelectorAll('.nav-btn')[0].classList.add('active');
-        products = getProducts();
-        renderProductsTable();
+        (async function() {
+            products = getProducts();
+            if (db) {
+                try {
+                    var fp = await getProductsFromFirebase();
+                    if (fp.success && fp.products && fp.products.length > 0) {
+                        products = fp.products.map(function(p) { p.id = Number(p.id); return p; });
+                        saveProducts(products);
+                    }
+                } catch(e) {}
+            }
+            renderProductsTable();
+        })();
     } else if (tabName === 'orders') {
         document.getElementById('ordersTab').style.display = 'block';
         document.querySelectorAll('.nav-btn')[1].classList.add('active');

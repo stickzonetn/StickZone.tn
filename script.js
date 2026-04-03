@@ -43,6 +43,24 @@ function initFirebase() {
     }
     db = firebase.firestore();
     
+    if (db) {
+        db.collection('products').onSnapshot(function(snapshot) {
+            snapshot.docChanges().forEach(function(change) {
+                if (change.type === 'added' || change.type === 'modified') {
+                    var fp = change.doc.data();
+                    fp.id = Number(change.doc.id);
+                    var existingIndex = products.findIndex(function(p) { return Number(p.id) === fp.id; });
+                    if (existingIndex >= 0) {
+                        products[existingIndex] = fp;
+                    } else {
+                        products.push(fp);
+                    }
+                    renderProducts(products);
+                }
+            });
+        });
+    }
+    
     if (firebase.messaging && firebase.messaging.isSupported()) {
         var messaging = firebase.messaging();
         messaging.usePublicVapidKey("BIJImK19REAXSKC7s8hOGIzQ904lIOmOTdXUOeUkxcCJF2T2AlFsvGkLhTsRFJXuQfekIWs32vLuPXj0XMIpGCY");
