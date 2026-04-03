@@ -98,7 +98,6 @@ function initFirebase() {
     
     if (firebase.messaging && firebase.messaging.isSupported()) {
         var messaging = firebase.messaging();
-        messaging.usePublicVapidKey("BIJImK19REAXSKC7s8hOGIzQ904lIOmOTdXUOeUkxcCJF2T2AlFsvGkLhTsRFJXuQfekIWs32vLuPXj0XMIpGCY");
         
         messaging.onMessage(function(payload) {
             console.log('Message received in admin:', payload);
@@ -110,7 +109,7 @@ function initFirebase() {
             }
         });
         
-        messaging.getToken().then(function(currentToken) {
+        messaging.getToken({ vapidKey: "BIJImK19REAXSKC7s8hOGIzQ904lIOmOTdXUOeUkxcCJF2T2AlFsvGkLhTsRFJXuQfekIWs32vLuPXj0XMIpGCY" }).then(function(currentToken) {
             if (currentToken) {
                 console.log('Admin FCM Token:', currentToken);
                 localStorage.setItem('admin_fcm_token', currentToken);
@@ -1104,33 +1103,51 @@ window.loadTheme = loadTheme;
 window.requestAdminNotificationPermission = requestAdminNotificationPermission;
 
 function requestAdminNotificationPermission() {
-    if ('Notification' in window && Notification.permission === 'default') {
-        Notification.requestPermission().then(function(permission) {
-            if (permission === 'granted') {
-                showToast('Notifications enabled!', 'success');
-                getFCMToken();
-            }
-        });
-    } else if (Notification.permission === 'granted') {
-        getFCMToken();
+    if ('Notification' in window) {
+        if (Notification.permission === 'default') {
+            Notification.requestPermission().then(function(permission) {
+                console.log('Notification permission:', permission);
+                if (permission === 'granted') {
+                    showToast('Notifications enabled!', 'success');
+                    getFCMToken();
+                } else {
+                    showToast('Notification permission denied', 'error');
+                }
+            }).catch(function(err) {
+                console.log('Error requesting permission:', err);
+            });
+        } else if (Notification.permission === 'granted') {
+            getFCMToken();
+        } else {
+            showToast('Notifications blocked. Enable in browser settings.', 'error');
+        }
+    } else {
+        showToast('Notifications not supported', 'error');
     }
 }
 
 function getFCMToken() {
-    if (firebase.messaging && firebase.messaging.isSupported()) {
-        var messaging = firebase.messaging();
-        messaging.usePublicVapidKey("BIJImK19REAXSKC7s8hOGIzQ904lIOmOTdXUOeUkxcCJF2T2AlFsvGkLhTsRFJXuQfekIWs32vLuPXj0XMIpGCY");
-        
-        messaging.getToken().then(function(currentToken) {
+    if (!firebase.messaging || !firebase.messaging.isSupported()) {
+        showToast('Firebase Messaging not supported', 'error');
+        return;
+    }
+    
+    var messaging = firebase.messaging();
+    
+    messaging.getToken({ vapidKey: "BIJImK19REAXSKC7s8hOGIzQ904lIOmOTdXUOeUkxcCJF2T2AlFsvGkLhTsRFJXuQfekIWs32vLuPXj0XMIpGCY" })
+        .then(function(currentToken) {
             if (currentToken) {
                 console.log('FCM Registration Token:', currentToken);
                 localStorage.setItem('admin_fcm_token', currentToken);
                 showToast('Token generated! Check console.', 'success');
+            } else {
+                showToast('No token available', 'warning');
             }
-        }).catch(function(err) {
+        })
+        .catch(function(err) {
             console.log('Error getting FCM token:', err);
+            showToast('Error: ' + err.message, 'error');
         });
-    }
 }
 
 window.getFCMToken = getFCMToken;

@@ -93,7 +93,6 @@ function initFirebase() {
     
     if (firebase.messaging && firebase.messaging.isSupported()) {
         var messaging = firebase.messaging();
-        messaging.usePublicVapidKey("BIJImK19REAXSKC7s8hOGIzQ904lIOmOTdXUOeUkxcCJF2T2AlFsvGkLhTsRFJXuQfekIWs32vLuPXj0XMIpGCY");
         
         messaging.onMessage(function(payload) {
             console.log('Message received:', payload);
@@ -105,7 +104,7 @@ function initFirebase() {
             }
         });
         
-        messaging.getToken().then(function(currentToken) {
+        messaging.getToken({ vapidKey: "BIJImK19REAXSKC7s8hOGIzQ904lIOmOTdXUOeUkxcCJF2T2AlFsvGkLhTsRFJXuQfekIWs32vLuPXj0XMIpGCY" }).then(function(currentToken) {
             if (currentToken) {
                 console.log('FCM Token:', currentToken);
                 localStorage.setItem('fcm_token', currentToken);
