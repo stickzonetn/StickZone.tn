@@ -1108,10 +1108,32 @@ function requestAdminNotificationPermission() {
         Notification.requestPermission().then(function(permission) {
             if (permission === 'granted') {
                 showToast('Notifications enabled!', 'success');
+                getFCMToken();
             }
+        });
+    } else if (Notification.permission === 'granted') {
+        getFCMToken();
+    }
+}
+
+function getFCMToken() {
+    if (firebase.messaging && firebase.messaging.isSupported()) {
+        var messaging = firebase.messaging();
+        messaging.usePublicVapidKey("BIJImK19REAXSKC7s8hOGIzQ904lIOmOTdXUOeUkxcCJF2T2AlFsvGkLhTsRFJXuQfekIWs32vLuPXj0XMIpGCY");
+        
+        messaging.getToken().then(function(currentToken) {
+            if (currentToken) {
+                console.log('FCM Registration Token:', currentToken);
+                localStorage.setItem('admin_fcm_token', currentToken);
+                showToast('Token generated! Check console.', 'success');
+            }
+        }).catch(function(err) {
+            console.log('Error getting FCM token:', err);
         });
     }
 }
+
+window.getFCMToken = getFCMToken;
 
 // Initialize after DOM is ready with setTimeout to ensure all functions are defined
 document.addEventListener('DOMContentLoaded', function() {
